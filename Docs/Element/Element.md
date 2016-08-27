@@ -168,7 +168,7 @@ Creates a new Element of the type passed in.
 
 ### Note:
 
-Because the element name is parsed as a CSS selector, colons in namespaced tags have to be escaped. So `new Element('fb\:name')` becomes `<fb:name>`.
+Because the element name is parsed as a CSS selector, colons in namespaced tags have to be escaped. So `new Element('fb\\:name')` becomes `<fb:name>`.
 
 ### See Also:
 
@@ -882,13 +882,13 @@ Clones the Element and returns the cloned one.
 
 ### Note:
 
-- The returned Element does not have attached events. To clone the events use [Element:cloneEvents](/Element/Element.Event#Element:cloneEvents).
+- The returned Element does not have attached events. To clone the events use [Element:cloneEvents](/core/Element/Element.Event#Element:cloneEvents).
 - Values stored in Element.Storage are not cloned.
 - The clone element and its children are stripped of ids, unless otherwise specified by the keepid parameter.
 
 ### See Also:
 
-- [Element:cloneEvents](/Element/Element.Event#Element:cloneEvents).
+- [Element:cloneEvents](/core/Element/Element.Event#Element:cloneEvents).
 
 
 
@@ -952,7 +952,7 @@ Tests the Element to see if it has the passed in className.
 Element Method: addClass {#Element:addClass}
 --------------------------------------------
 
-Adds the passed in class to the Element, if the Element doesnt already have it.
+Adds the passed in class to the Element, if the Element doesn't already have it.
 
 ### Syntax:
 
@@ -1096,7 +1096,7 @@ As [Element:getPrevious][], but tries to find the nextSibling (excluding text no
 
 ### Arguments:
 
-1. match - (*string*, optional): A comma seperated list of tag names to match the found element(s) with. A full CSS selector can be passed.
+1. match - (*string*, optional): A comma separated list of tag names to match the found element(s) with. A full CSS selector can be passed.
 
 ### Returns:
 

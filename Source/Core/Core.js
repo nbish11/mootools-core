@@ -7,7 +7,7 @@ description: The heart of MooTools.
 
 license: MIT-style license.
 
-copyright: Copyright (c) 2006-2014 [Valerio Proietti](http://mad4milk.net/).
+copyright: Copyright (c) 2006-2015 [Valerio Proietti](http://mad4milk.net/).
 
 authors: The MooTools production team (http://mootools.net/developers/)
 
@@ -19,11 +19,11 @@ provides: [Core, MooTools, Type, typeOf, instanceOf, Native]
 
 ...
 */
-/*! MooTools: the javascript framework. license: MIT-style license. copyright: Copyright (c) 2006-2014 [Valerio Proietti](http://mad4milk.net/).*/
+/*! MooTools: the javascript framework. license: MIT-style license. copyright: Copyright (c) 2006-2015 [Valerio Proietti](http://mad4milk.net/).*/
 (function(){
 
 this.MooTools = {
-	version: '1.5.2-dev',
+	version: '1.6.1-dev',
 	build: '%build%'
 };
 
@@ -57,13 +57,25 @@ var instanceOf = this.instanceOf = function(item, object){
 	return item instanceof object;
 };
 
-// Function overloading
+var hasOwnProperty = Object.prototype.hasOwnProperty;
 
-var Function = this.Function;
-
+/*<ltIE8>*/
 var enumerables = true;
 for (var i in {toString: 1}) enumerables = null;
 if (enumerables) enumerables = ['hasOwnProperty', 'valueOf', 'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString', 'toString', 'constructor'];
+function forEachObjectEnumberableKey(object, fn, bind){
+	if (enumerables) for (var i = enumerables.length; i--;){
+		var k = enumerables[i];
+		// signature has key-value, so overloadSetter can directly pass the
+		// method function, without swapping arguments.
+		if (hasOwnProperty.call(object, k)) fn.call(bind, k, object[k]);
+	}
+}
+/*</ltIE8>*/
+
+// Function overloading
+
+var Function = this.Function;
 
 Function.prototype.overloadSetter = function(usePlural){
 	var self = this;
@@ -71,10 +83,9 @@ Function.prototype.overloadSetter = function(usePlural){
 		if (a == null) return this;
 		if (usePlural || typeof a != 'string'){
 			for (var k in a) self.call(this, k, a[k]);
-			if (enumerables) for (var i = enumerables.length; i--;){
-				k = enumerables[i];
-				if (a.hasOwnProperty(k)) self.call(this, k, a[k]);
-			}
+			/*<ltIE8>*/
+			forEachObjectEnumberableKey(a, self, this);
+			/*</ltIE8>*/
 		} else {
 			self.call(this, a, b);
 		}
@@ -111,25 +122,34 @@ Function.prototype.implement = function(key, value){
 
 var slice = Array.prototype.slice;
 
-Function.from = function(item){
+Array.convert = function(item){
+	if (item == null) return [];
+	return (Type.isEnumerable(item) && typeof item != 'string') ? (typeOf(item) == 'array') ? item : slice.call(item) : [item];
+};
+
+Function.convert = function(item){
 	return (typeOf(item) == 'function') ? item : function(){
 		return item;
 	};
 };
 
-Array.from = function(item){
-	if (item == null) return [];
-	return (Type.isEnumerable(item) && typeof item != 'string') ? (typeOf(item) == 'array') ? item : slice.call(item) : [item];
-};
 
-Number.from = function(item){
+Number.convert = function(item){
 	var number = parseFloat(item);
 	return isFinite(number) ? number : null;
 };
 
-String.from = function(item){
+String.convert = function(item){
 	return item + '';
 };
+
+/*<1.5compat>*/
+Array.from = Array.convert;
+/*</1.5compat>*/
+
+Function.from = Function.convert;
+Number.from = Number.convert;
+String.from = String.convert;
 
 // hide, protect
 
@@ -301,16 +321,7 @@ Number.extend('random', function(min, max){
 	return Math.floor(Math.random() * (max - min + 1) + min);
 });
 
-// forEach, each
-
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-Object.extend('forEach', function(object, fn, bind){
-	for (var key in object){
-		if (hasOwnProperty.call(object, key)) fn.call(bind, object[key], key, object);
-	}
-});
-
-Object.each = Object.forEach;
+// forEach, each, keys
 
 Array.implement({
 
@@ -328,6 +339,32 @@ Array.implement({
 	}
 
 });
+
+Object.extend({
+
+	keys: function(object){
+		var keys = [];
+		for (var k in object){
+			if (hasOwnProperty.call(object, k)) keys.push(k);
+		}
+		/*<ltIE8>*/
+		forEachObjectEnumberableKey(object, function(k){
+			keys.push(k);
+		});
+		/*</ltIE8>*/
+		return keys;
+	},
+
+	forEach: function(object, fn, bind){
+		Object.keys(object).forEach(function(key){
+			fn.call(bind, object[key], key, object);
+		});
+	}
+
+});
+
+Object.each = Object.forEach;
+
 
 // Array & Object cloning, Object merging and appending
 
@@ -350,7 +387,7 @@ var mergeOne = function(source, key, current){
 		case 'object':
 			if (typeOf(source[key]) == 'object') Object.merge(source[key], current);
 			else source[key] = Object.clone(current);
-		break;
+			break;
 		case 'array': source[key] = current.clone(); break;
 		default: source[key] = current;
 	}
@@ -451,7 +488,7 @@ Array.type = function(item){
 };
 
 this.$A = function(item){
-	return Array.from(item).slice();
+	return Array.convert(item).slice();
 };
 
 this.$arguments = function(i){
@@ -495,10 +532,10 @@ this.$merge = function(){
 	return Object.merge.apply(null, args);
 };
 
-this.$lambda = Function.from;
+this.$lambda = Function.convert;
 this.$mixin = Object.merge;
 this.$random = Number.random;
-this.$splat = Array.from;
+this.$splat = Array.convert;
 this.$time = Date.now;
 
 this.$type = function(object){

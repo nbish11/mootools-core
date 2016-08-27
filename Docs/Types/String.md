@@ -9,14 +9,14 @@ A collection of the String Object methods and functions.
 
 
 
-Function: String.from {#String:String-from}
+Function: String.convert {#String:String:convert}
 ------------------------------------
 
 Returns the passed parameter as a String.
 
 ### Syntax:
 
-	String.from(arg);
+	String.convert(arg);
 
 ### Arguments:
 
@@ -28,8 +28,8 @@ Returns the passed parameter as a String.
 
 ### Example:
 
-	String.from(2); // returns '2'
-	String.from(true); // returns 'true'
+	String.convert(2); // returns '2'
+	String.convert(true); // returns 'true'
 
 
 
@@ -377,7 +377,7 @@ Removes undefined keywords and ignores escaped keywords.
 String method: stripScripts {#String:stripScripts}
 ----------------------------------------------------
 
-Strips the String of its *<script>* tags and anything in between them.
+Strips the String of its `<script>` tags and anything in between them.
 
 ### Syntax:
 

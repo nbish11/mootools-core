@@ -75,11 +75,11 @@ Element.implement({
 		// This svg section under, calling `svgCalculateSize()`, can be removed when FF fixed the svg size bug.
 		// Bug info: https://bugzilla.mozilla.org/show_bug.cgi?id=530985
 		if (this.get('tag') == 'svg') return svgCalculateSize(this);
-		
+
 		try {
 			var bounds = this.getBoundingClientRect();
 			return {x: bounds.width, y: bounds.height};
-		} catch(e) {
+		} catch (e){
 			return {x: 0, y: 0};
 		}
 	},
@@ -119,14 +119,14 @@ Element.implement({
 
 		try {
 			return element.offsetParent;
-		} catch(e){}
+		} catch (e){}
 		return null;
 	},
 
 	getOffsets: function(){
 		var hasGetBoundingClientRect = this.getBoundingClientRect;
 //<1.4compat>
-		hasGetBoundingClientRect = hasGetBoundingClientRect && !Browser.Platform.ios
+		hasGetBoundingClientRect = hasGetBoundingClientRect && !Browser.Platform.ios;
 //</1.4compat>
 		if (hasGetBoundingClientRect){
 			var bound = this.getBoundingClientRect(),
@@ -136,8 +136,8 @@ Element.implement({
 				isFixed = (styleString(this, 'position') == 'fixed');
 
 			return {
-				x: bound.left.toInt() + elemScrolls.x + ((isFixed) ? 0 : htmlScroll.x) - html.clientLeft,
-				y: bound.top.toInt() + elemScrolls.y + ((isFixed) ? 0 : htmlScroll.y) - html.clientTop
+				x: bound.left.toFloat() + elemScrolls.x + ((isFixed) ? 0 : htmlScroll.x) - html.clientLeft,
+				y: bound.top.toFloat() + elemScrolls.y + ((isFixed) ? 0 : htmlScroll.y) - html.clientTop
 			};
 		}
 
@@ -257,9 +257,11 @@ function styleNumber(element, style){
 	return styleString(element, style).toInt() || 0;
 }
 
+//<1.4compat>
 function borderBox(element){
 	return styleString(element, '-moz-box-sizing') == 'border-box';
 }
+//</1.4compat>
 
 function topBorder(element){
 	return styleNumber(element, 'border-top-width');
@@ -281,7 +283,7 @@ function getCompatElement(element){
 })();
 
 //aliases
-Element.alias({position: 'setPosition'}); //compatability
+Element.alias({position: 'setPosition'}); //compatibility
 
 [Window, Document, Element].invoke('implement', {
 
